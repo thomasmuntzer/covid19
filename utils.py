@@ -114,6 +114,8 @@ def createXYPlot(dfplot: pd.DataFrame,
     else:
         plt.yticks(fontsize=12)
     
+    if yscale != "linear":
+        savename += f"_{yscale}"
     if savename:
         plt.savefig(f"{plots_folder}/{savename}",bbox_inches="tight")
     plt.show()
