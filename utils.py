@@ -10,7 +10,6 @@ from typing import Union, List
 def createXYPlot(dfplot: pd.DataFrame,
                  x: str,
                  y: Union[str, List[str]],
-                 today: str,
                  plots_folder: str,
                  labels: Union[str, List[str]] = None,
                  error = False,
