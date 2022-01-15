@@ -122,6 +122,88 @@ def createXYPlot(dfplot: pd.DataFrame,
     
     del(fig)
     
+
+def getVariables(df):
+
+    df["data"] = pd.to_datetime(df["data"])
+    df["dow"] = df["data"].dt.dayofweek
+    df = df.fillna({"tamponi_test_antigenico_rapido":0})
+    
+    df["tamponi_test_molecolare"] = df["tamponi_test_molecolare"].combine_first(df["tamponi"])
+    
+    df["nuovi_positivi_lag_7"] = df["nuovi_positivi"].shift(7)
+    df["ingressi_terapia_intensiva_lag_7"] = df["ingressi_terapia_intensiva"].shift(7)
+
+    df['giorno'] = df['data'].dt.date
+    
+    df["nuovi_positivi_test_molecolare"] = df["totale_positivi_test_molecolare"] - df["totale_positivi_test_molecolare"].shift(1)
+    df["nuovi_positivi_test_rapido"] = df["totale_positivi_test_antigenico_rapido"] -  df["totale_positivi_test_antigenico_rapido"].shift(1)
+    
+    df["variazione_deceduti"] = df["deceduti"] - df["deceduti"].shift(1)
+    df["variazione_positivi"] = df["totale_positivi"] - df["totale_positivi"].shift(1)
+    df["variazione_relativa_positivi"] = df["nuovi_positivi"]/df["totale_positivi"].shift(1)
+    df["variazione_deceduti_media_7"] = df.sort_values("data")["variazione_deceduti"].rolling(7).mean()
+    
+    df["ingressi_terapia_intensiva_30"] = df.sort_values("data")["ingressi_terapia_intensiva"].rolling(30).sum()
+    
+    df["variazione_guariti"] = df["dimessi_guariti"] - df["dimessi_guariti"].shift(1)
+    df["variazione_ospedalizzati"] = df["totale_ospedalizzati"] - df["totale_ospedalizzati"].shift(1)
+    df["variazione_ricoverati_con_sintomi"] = df["ricoverati_con_sintomi"] - df["ricoverati_con_sintomi"].shift(1)
+    df["variazione_isolamento_domiciliare"] = df["isolamento_domiciliare"] - df["isolamento_domiciliare"].shift(1)
+    df["variazione_terapia_intensiva"] = df["terapia_intensiva"] - df["terapia_intensiva"].shift(1)
+    df["variazione_tamponi"] = df["tamponi"] - df["tamponi"].shift(1)
+    df["variazione_tamponi_molecolari"] = df["tamponi_test_molecolare"] - df["tamponi_test_molecolare"].shift(1)
+    df["variazione_tamponi_rapidi"] = df["tamponi_test_antigenico_rapido"] - df["tamponi_test_antigenico_rapido"].shift(1)
+    
+    df["ti_ratio"] = 100 * df["ingressi_terapia_intensiva"]/df["nuovi_positivi_lag_7"]
+    df["death_ti_ratio"] = 100 * df["variazione_deceduti"]/df["ingressi_terapia_intensiva_lag_7"]
+    
+    df["tasso_positivi"] = 100*(df["nuovi_positivi"]/df["variazione_tamponi"])
+    df["tasso_positivi_test_rapido"] = 100*(df["nuovi_positivi_test_rapido"]/df["variazione_tamponi_rapidi"])
+    df["tasso_positivi_test_molecolare"] = 100*(df["nuovi_positivi_test_molecolare"]/df["variazione_tamponi_molecolari"])
+    df["tasso_positivi_test_molecolare"] =  df["tasso_positivi_test_molecolare"].combine_first(df["tasso_positivi"])
+
+    df["mortalità"] = df["deceduti"]/df["totale_casi"]
+    df["variazione_mortalità"] = df["mortalità"]-df["mortalità"].shift(1)
+    df["sd_mortalità"] = np.sqrt((df["mortalità"]*(1-df["mortalità"]))/df["totale_casi"])
+    df["sd_tasso_positivi"] = np.sqrt((df["tasso_positivi"]*(1-df["tasso_positivi"]))/df["variazione_tamponi"])
+    
+    
+    df["frazione_ospedalizzati"] = df["totale_ospedalizzati"]/df["totale_positivi"]
+    df["frazione_terapia_intensiva"] = df["terapia_intensiva"]/df["totale_positivi"]
+    df["frazione_isolamento_domiciliare"] = df["isolamento_domiciliare"]/df["totale_positivi"]
+    df["frazione_tamponi_rapidi"] = df["variazione_tamponi_rapidi"]/df["variazione_tamponi"]
+    
+    
+        
+    roll_mean_vars = ["nuovi_positivi",
+                      "ti_ratio",
+                      "variazione_tamponi",
+                      "variazione_positivi",
+                      "variazione_terapia_intensiva",
+                      "variazione_relativa_positivi",
+                      "tasso_positivi",
+                      "tasso_positivi_test_rapido",
+                      "tasso_positivi_test_molecolare",
+                      "ingressi_terapia_intensiva",
+                      "variazione_ospedalizzati",
+                      "variazione_guariti",
+                      "frazione_ospedalizzati",
+                      "frazione_terapia_intensiva",
+                      "frazione_isolamento_domiciliare",
+                      "mortalità",
+                      "frazione_tamponi_rapidi",
+                      "variazione_tamponi_rapidi",
+                      "variazione_tamponi_molecolari"
+                     ]
+    
+    for var in roll_mean_vars:
+        df[var+"_media_7"] = df.sort_values("data")[var].rolling(7).mean()
+
+    df = df.sort_values(by="giorno",ascending = False).reset_index().drop(columns=["index"])
+    
+    return df
+    
     
     
 def get_efficacy(df: pd.DataFrame, z_value=1.645):
