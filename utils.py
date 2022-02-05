@@ -12,6 +12,7 @@ def createXYPlot(dfplot: pd.DataFrame,
                  y: Union[str, List[str]],
                  plots_folder: str,
                  labels: Union[str, List[str]] = None,
+                 linestyles: Union[str, List[str]] = None,
                  error = False,
                  asymmetric_error: bool = False,
                  remove_negative: bool = False,
@@ -56,6 +57,9 @@ def createXYPlot(dfplot: pd.DataFrame,
     if type(alphas) != list:
         alphas = [None for x in y]
         
+    if type(linestyles) != list:
+        linestyles = ["-" for x in y]
+        
     if type(colors) != list:
         colors = [None for x in y]
         
@@ -85,7 +89,13 @@ def createXYPlot(dfplot: pd.DataFrame,
                          error_kw={"capsize":1.5,"elinewidth":1}
                    )
         else:
-            plt.plot(x_data, y_data, alpha=alphas[i], color=colors[i], linewidth=linewidth, label=labels[i])
+            plt.plot(x_data, 
+                     y_data, 
+                     alpha=alphas[i], 
+                     color=colors[i], 
+                     linewidth=linewidth, 
+                     linestyle=linestyles[i],
+                     label=labels[i])
         i+=1
         
     plt.grid(which="both")
