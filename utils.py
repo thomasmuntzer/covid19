@@ -10,7 +10,7 @@ from typing import Union, List
 def createXYPlot(dfplot: pd.DataFrame,
                  x: str,
                  y: Union[str, List[str]],
-                 plots_folder: str,
+                 plots_folder: str = None,
                  labels: Union[str, List[str]] = None,
                  linestyles: Union[str, List[str]] = None,
                  error = False,
@@ -77,14 +77,15 @@ def createXYPlot(dfplot: pd.DataFrame,
         else:
             y_err=None
         if bar:
+            print(f"Yerr {y_err}")
             plt.bar(x_data + bar_start[i] * bar_width, 
                          y_data, 
                          yerr=y_err,
                          xerr=None,
                          width=bar_width, 
                          align="center", 
-                         alpha=alpha, 
-                         color=color, 
+                         alpha=alphas[i], 
+                         color=colors[i], 
                          label=labels[i],
                          error_kw={"capsize":1.5,"elinewidth":1}
                    )
