@@ -6,6 +6,11 @@ import numpy as np
 from datetime import datetime
 import pandas as pd
 from typing import Union, List
+import matplotlib
+
+matplotlib.rcParams['axes.grid'] = True
+matplotlib.rcParams['legend.fontsize'] = 12
+standard_colors = list(plt.rcParams['axes.prop_cycle'].by_key()['color'])
 
 def createXYPlot(dfplot: pd.DataFrame,
                  x: str,
@@ -32,6 +37,7 @@ def createXYPlot(dfplot: pd.DataFrame,
                  title: str = None,
                  colors: List[str] = None,
                  start_date: str = None,
+                 alpha_err: float = 0.1,
                  xlim: float = None,
                  days_interval: int = 4):
     
@@ -49,19 +55,20 @@ def createXYPlot(dfplot: pd.DataFrame,
     
     xindexes = [x for x in sorted(dfplot.index) if x % days_interval == 0]
     xlabels =  [str(dfplot[x].tolist()[i]) for i in xindexes]
-
+    
+    # Counter for more objects
     i=0 
     if type(y) != list:
         y = [y]
         
     if type(alphas) != list:
-        alphas = [None for x in y]
+        alphas = [None for i in y]
         
     if type(linestyles) != list:
-        linestyles = ["-" for x in y]
+        linestyles = ["-" for i in y]
         
     if type(colors) != list:
-        colors = [None for x in y]
+        colors = [standard_colors[i] for i in range(len(y))]
         
     if labels is None:
         labels = y
@@ -69,15 +76,14 @@ def createXYPlot(dfplot: pd.DataFrame,
     for y_name in y:
         x_data = dfplot.index
         y_data = np.array(dfplot[y_name])
-        if error: 
-            if asymmetric_error:
-                y_err = [np.array(dfplot["err_" + y_name + "_lo"]), np.array(dfplot["err_" + y_name + "_hi"])]
-            else:
-                y_err = np.array(dfplot["err_" + y_name])
-        else:
-            y_err=None
+        y_err = None
         if bar:
-            print(f"Yerr {y_err}")
+            if error:
+                if asymmetric_error:
+                    y_err = [np.array(dfplot["err_" + y_name + "_lo"]), 
+                             np.array(dfplot["err_" + y_name + "_hi"])]
+                else:
+                    y_err = np.array(dfplot["err_" + y_name])
             plt.bar(x_data + bar_start[i] * bar_width, 
                          y_data, 
                          yerr=y_err,
@@ -85,7 +91,8 @@ def createXYPlot(dfplot: pd.DataFrame,
                          width=bar_width, 
                          align="center", 
                          alpha=alphas[i], 
-                         color=colors[i], 
+                         color=colors[i],
+                         edgecolor=colors[i],
                          label=labels[i],
                          error_kw={"capsize":1.5,"elinewidth":1}
                    )
@@ -97,13 +104,22 @@ def createXYPlot(dfplot: pd.DataFrame,
                      linewidth=linewidth, 
                      linestyle=linestyles[i],
                      label=labels[i])
+            if error:
+                plt.fill_between(x_data, 
+                                 y_data - dfplot["err_" + y_name],
+                                 y_data + dfplot["err_" + y_name],
+                                 alpha=alpha_err,
+                                 color=colors[i]
+                                )
+                
+            
         i+=1
         
-    plt.grid(which="both")
     if len(y) > 1: 
-        plt.legend(fontsize=12)
-    
+        plt.legend()
+    # Set Scale
     plt.yscale(yscale)
+    
     if xtitle: 
         plt.xlabel(xtitle,fontsize=14)
     if ytitle:
