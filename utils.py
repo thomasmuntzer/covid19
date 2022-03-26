@@ -143,7 +143,7 @@ def createXYPlot(dfplot: pd.DataFrame,
     if yscale != "linear":
         savename += f"_{yscale}"
     if savename:
-        plt.savefig(f"{plots_folder}/{savename}",bbox_inches="tight")
+        plt.savefig(f"{plots_folder}/{savename}", bbox_inches="tight", facecolor="w")
     plt.show()
     plt.close()
     
