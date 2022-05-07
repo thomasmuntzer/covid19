@@ -50,6 +50,10 @@ def createXYPlot(dfplot: pd.DataFrame,
             dfplot = dfplot[dfplot[yname] > 0]
             
     dfplot = dfplot.sort_values(x).reset_index() 
+    if dfplot.empty:
+        print("Empty dataframe can't plot anything")
+        return None
+    
     first_day = str(dfplot[x].tolist()[0])
     fig, ax = plt.subplots(figsize=(figsize_x, figsize_y),dpi=dpis)
     
