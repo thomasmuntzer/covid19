@@ -132,7 +132,6 @@ dmypy.json
 .token
 .DS_Store
 
-*.png
 
 **/.ipynb_checkpoints/
 .ipynb_checkpoints/
