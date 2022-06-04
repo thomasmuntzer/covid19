@@ -76,7 +76,7 @@ def createXYPlot(dfplot: pd.DataFrame,
         
     if labels is None:
         labels = y
-        
+     
     for y_name in y:
         x_data = dfplot.index
         y_data = np.array(dfplot[y_name])
@@ -101,17 +101,19 @@ def createXYPlot(dfplot: pd.DataFrame,
                          error_kw={"capsize":1.5,"elinewidth":1}
                    )
         else:
-            plt.plot(x_data, 
-                     y_data, 
+            mask = np.isfinite(y_data)
+            
+            plt.plot(x_data[mask], 
+                     y_data[mask], 
                      alpha=alphas[i], 
                      color=colors[i], 
                      linewidth=linewidth, 
                      linestyle=linestyles[i],
                      label=labels[i])
             if error:
-                plt.fill_between(x_data, 
-                                 y_data - dfplot["err_" + y_name],
-                                 y_data + dfplot["err_" + y_name],
+                plt.fill_between(x_data[mask], 
+                                 (y_data - dfplot["err_" + y_name])[mask],
+                                 (y_data + dfplot["err_" + y_name])[mask],
                                  alpha=alpha_err,
                                  color=colors[i]
                                 )
