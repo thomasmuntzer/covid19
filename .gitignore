@@ -133,3 +133,6 @@ dmypy.json
 .DS_Store
 
 *.png
+
+**/.ipynb_checkpoints/
+.ipynb_checkpoints/
